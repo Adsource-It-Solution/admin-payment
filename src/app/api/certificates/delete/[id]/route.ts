@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
 import connect from "@/app/lib/mongodb";
 import Certificate from "@/app/models/certificate";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: { id: string };
+}
+
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
   try {
     await connect();
     const deleted = await Certificate.findByIdAndDelete(params.id);
