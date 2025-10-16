@@ -4,11 +4,11 @@ import Certificate from "@/app/models/certificate";
 
 export async function DELETE(
   _req: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connect();
-    const deleted = await Certificate.findByIdAndDelete(context.params.id);
+    const deleted = await Certificate.findByIdAndDelete(params.id);
 
     if (!deleted) {
       return NextResponse.json(
@@ -30,4 +30,3 @@ export async function DELETE(
     );
   }
 }
-
