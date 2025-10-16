@@ -15,8 +15,6 @@ import { FaRupeeSign } from 'react-icons/fa';
 import { Email, Home, Description, CreditCard, Receipt } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { db, auth } from '@/app/lib/firebaseconfig';
-import { doc, setDoc, collection } from 'firebase/firestore';
 
 function CreateReceipt() {
   const [name, setName] = useState('');
@@ -32,29 +30,37 @@ function CreateReceipt() {
 
   const receiptRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+ useEffect(() => {
+    console.log("🧮 Recalculating total:", { quantity, unitPrice });
     if (quantity && unitPrice) {
-      const total = quantity * parseFloat(unitPrice || '0');
+      const total = quantity * parseFloat(unitPrice || "0");
+      console.log("✅ Computed Total:", total);
       setTotalAmount(total.toFixed(2));
     }
   }, [quantity, unitPrice]);
 
+  /* ==============================
+     📅 Format Date
+  ===============================*/
   const formatDate = (dateString: string) => {
-    if (!dateString) return '';
+    console.log("🗓 Formatting date:", dateString);
+    if (!dateString) return "";
     const dateObj = new Date(dateString);
     const day = dateObj.getDate();
-    const month = dateObj.toLocaleString('default', { month: 'long' });
+    const month = dateObj.toLocaleString("default", { month: "long" });
     const year = dateObj.getFullYear();
 
-    let suffix = 'th';
-    if (day % 10 === 1 && day !== 11) suffix = 'st';
-    else if (day % 10 === 2 && day !== 12) suffix = 'nd';
-    else if (day % 10 === 3 && day !== 13) suffix = 'rd';
+    let suffix = "th";
+    if (day % 10 === 1 && day !== 11) suffix = "st";
+    else if (day % 10 === 2 && day !== 12) suffix = "nd";
+    else if (day % 10 === 3 && day !== 13) suffix = "rd";
 
     return `${day}${suffix} ${month} ${year}`;
   };
 
-  // ✅ Save to Backend Example
+  /* ==============================
+     💾 Save to Backend
+  ===============================*/
   const handleSaveToBackend = async () => {
     try {
       const payload = {
@@ -70,35 +76,56 @@ function CreateReceipt() {
         date,
       };
 
-      const response = await fetch('/api/create-receipt/save', {
-        method: 'POST',
+      console.log("📤 Sending payload to backend:", payload);
+
+      const response = await fetch("/api/create-receipt", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Failed to save receipt');
-      alert('✅ Receipt data saved successfully!');
+      console.log("📥 Raw response:", response);
+
+      if (!response.ok) throw new Error("Failed to save receipt");
+
+      const result = await response.json();
+      console.log("✅ Backend response data:", result);
+
+      alert("✅ Receipt data saved successfully!");
     } catch (error) {
-      console.error('❌ Error saving receipt:', error);
-      alert('❌ Failed to save receipt');
+      console.error("❌ Error saving receipt:", error);
+      alert("❌ Failed to save receipt");
     }
   };
 
-
-  // 📄 Download as PDF
+  /* ==============================
+     📄 Download PDF
+  ===============================*/
   const handleDownloadPDF = async () => {
-    if (!receiptRef.current) return;
+    console.log("📄 Starting PDF download...");
 
-    const canvas = await html2canvas(receiptRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
+    if (!receiptRef.current) {
+      console.error("❌ Receipt reference not found!");
+      return;
+    }
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-    pdf.save(`Receipt_${transactionID}.pdf`);
+    try {
+      const canvas = await html2canvas(receiptRef.current, { scale: 2 });
+      console.log("🖼 Canvas captured:", canvas);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`Receipt_${transactionID}.pdf`);
+      console.log("✅ PDF downloaded successfully!");
+    } catch (err) {
+      console.error("❌ PDF generation failed:", err);
+    }
   };
 
   return (

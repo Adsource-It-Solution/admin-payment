@@ -23,7 +23,7 @@ interface Receipt {
   title: string;
   amount: number;
   date: string;
-  description: string;
+  description?: string;
 }
 
 export default function ReceiptList() {
@@ -36,11 +36,22 @@ export default function ReceiptList() {
   const fetchReceipts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/create-receipt/fetch");
+      const res = await fetch("/api/create-receipt");
       const data = await res.json();
-      if (data.success) setReceipts(data.receipts);
+      console.log("Fetched receipts:", data);
+
+      // Defensive data check
+      if (data.success && Array.isArray(data.data)) {
+        setReceipts(data.data);
+      } else if (data.success && Array.isArray(data.receipts)) {
+        setReceipts(data.receipts);
+      } else {
+        console.warn("Unexpected data format:", data);
+        setReceipts([]); // fallback to empty array
+      }
     } catch (err) {
       console.error("Fetch Error:", err);
+      setReceipts([]);
     } finally {
       setLoading(false);
     }
@@ -50,7 +61,7 @@ export default function ReceiptList() {
     fetchReceipts();
   }, []);
 
-  // ✅ Create or Update
+  // ✅ Handle Save (Create or Update)
   const handleSave = async () => {
     if (!currentReceipt?.title || !currentReceipt?.amount || !currentReceipt?.date) {
       alert("Please fill Title, Amount, and Date");
@@ -59,8 +70,8 @@ export default function ReceiptList() {
 
     const method = currentReceipt._id ? "PUT" : "POST";
     const url = currentReceipt._id
-      ? `/api/receipts/update/${currentReceipt._id}`
-      : "/api/receipts/create";
+      ? `/api/create-receipt/${currentReceipt._id}`
+      : `/api/create-receipt`;
 
     try {
       const res = await fetch(url, {
@@ -69,6 +80,7 @@ export default function ReceiptList() {
         body: JSON.stringify(currentReceipt),
       });
       const data = await res.json();
+
       if (data.success) {
         fetchReceipts();
         setOpenEdit(false);
@@ -83,7 +95,7 @@ export default function ReceiptList() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this receipt?")) return;
     try {
-      const res = await fetch(`/api/receipts/delete/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/create-receipt/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) fetchReceipts();
     } catch (err) {
@@ -94,7 +106,8 @@ export default function ReceiptList() {
   // ✅ Download PDF
   const handleDownload = async (id: string) => {
     try {
-      const res = await fetch(`/api/receipts/pdf/${id}`);
+      const res = await fetch(`/api/create-receipt/pdf/${id}`);
+      if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -130,6 +143,10 @@ export default function ReceiptList() {
         <Box display="flex" justifyContent="center" mt={4}>
           <CircularProgress />
         </Box>
+      ) : receipts?.length === 0 ? (
+        <Typography variant="body1" color="text.secondary" align="center">
+          No receipts found.
+        </Typography>
       ) : (
         <Box
           sx={{
@@ -139,7 +156,7 @@ export default function ReceiptList() {
             justifyContent: "center",
           }}
         >
-          {receipts?.map((receipt) => (
+          {receipts.map((receipt) => (
             <Card
               key={receipt._id}
               elevation={4}
@@ -166,10 +183,13 @@ export default function ReceiptList() {
                   </Typography>
                 )}
                 <Stack direction="row" spacing={1} justifyContent="flex-end" mt={2}>
-                  <IconButton color="primary" onClick={() => {
-                    setCurrentReceipt(receipt);
-                    setOpenEdit(true);
-                  }}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => {
+                      setCurrentReceipt(receipt);
+                      setOpenEdit(true);
+                    }}
+                  >
                     <Edit />
                   </IconButton>
                   <IconButton color="error" onClick={() => handleDelete(receipt._id)}>

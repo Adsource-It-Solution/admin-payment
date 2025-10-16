@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CertificatePDF } from "@/app/components/certificatepdf";
+import { log } from "console";
 
 interface CertificateForm {
   name: string;
@@ -42,13 +43,15 @@ export default function CertificateEditor() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  console.log(savedCertificates)
+
   /* ======================================================
      💾 Save Certificate
   ====================================================== */
   const handleSave = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/certificates/save", {
+      const res = await fetch("/api/certificates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, ...formData }),
@@ -72,24 +75,22 @@ export default function CertificateEditor() {
   /* ======================================================
      📄 Fetch Certificates
   ====================================================== */
-  const fetchCertificates = async () => {
-    try {
-      const res = await fetch("/api/certificates/fetch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setSavedCertificates(data.certificates);
-      } else {
-        toast.error("❌ Failed to fetch certificates");
-      }
-    } catch (error) {
-      console.error("fetchCertificates -> error:", error);
+const fetchCertificates = async () => {
+  try {
+    const res = await fetch(`/api/certificates?userId=${userId}`);
+    const data = await res.json();
+    if (data.success) {
+      setSavedCertificates(data.data || []); // ✅ Fix: use `data.data`
+    } else {
+      toast.error("❌ Failed to fetch certificates");
+      setSavedCertificates([]); // avoid undefined
     }
-  };
+  } catch (error) {
+    console.error("fetchCertificates -> error:", error);
+    setSavedCertificates([]); // ensure it's always an array
+  }
+};
+
 
   useEffect(() => {
     fetchCertificates();
@@ -165,7 +166,7 @@ export default function CertificateEditor() {
 
       {/* ==== Form Section ==== */}
       <div className="w-full max-w-sm bg-white p-6 rounded-xl shadow-lg space-y-4">
-        <h2 className="text-xl font-semibold mb-4 text-[#0E1F47]">✍ Edit Certificate</h2>
+        <h2 className="text-xl font-semibold mb-4 text-[#0E1F47]">✍ Create Certificate</h2>
 
         <input
           type="text"
@@ -253,19 +254,6 @@ export default function CertificateEditor() {
             💾 Save
           </button>
         </div>
-
-        {savedCertificates.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Saved Certificates</h3>
-            <ul className="space-y-2 max-h-64 overflow-y-auto">
-              {savedCertificates.map((cert) => (
-                <li key={cert._id} className="border p-2 rounded bg-gray-50">
-                  <strong>{cert.name}</strong> - {cert.title}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
     </div>
   );
