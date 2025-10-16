@@ -1,98 +1,132 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import mongoose from "mongoose";
 import connect from "@/app/lib/mongodb";
-import Receipt from "@/app/models/receipt";
+import Receipt, { type IReceipt } from "@/app/models/receipt";
 
+/**
+ * GET /api/receipt/[id]
+ * Fetch a single receipt by ID
+ */
 export async function GET(
-  req: NextRequest,
-  context: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
 
   try {
     await connect();
-    const certificate = await Receipt.findById(id);
 
-    if (!certificate) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Invalid receipt ID" },
+        { status: 400 }
+      );
+    }
+
+    const receipt: IReceipt | null = await Receipt.findById(id);
+
+    if (!receipt) {
+      return NextResponse.json(
+        { success: false, message: "Receipt not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: certificate });
+    return NextResponse.json({ success: true, data: receipt });
   } catch (error) {
-    console.error("[GET single certificate error]", error);
+    console.error("[GET receipt error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch certificate" },
+      { success: false, message: "Failed to fetch receipt" },
       { status: 500 }
     );
   }
 }
 
-// 🧠 PUT update certificate
+/**
+ * PUT /api/receipt/[id]
+ * Update a receipt
+ */
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
 
   try {
     await connect();
-    const body = await req.json();
+    const body: Partial<IReceipt> = await req.json();
 
-    const updated = await Receipt.findByIdAndUpdate(id, body, {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid receipt ID" },
+        { status: 400 }
+      );
+    }
+
+    const updated: IReceipt | null = await Receipt.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
 
     if (!updated) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Receipt not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Certificate updated successfully",
+      message: "Receipt updated successfully",
       data: updated,
     });
   } catch (error) {
-    console.error("[PUT certificate error]", error);
+    console.error("[PUT receipt error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update certificate" },
+      { success: false, message: "Failed to update receipt" },
       { status: 500 }
     );
   }
 }
 
-// 🧠 DELETE certificate
+/**
+ * DELETE /api/receipt/[id]
+ * Delete a receipt
+ */
 export async function DELETE(
-  req: NextRequest,
-  context: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  const { id } = await params;
 
   try {
     await connect();
-    const deleted = await Receipt.findByIdAndDelete(id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid receipt ID" },
+        { status: 400 }
+      );
+    }
+
+    const deleted: IReceipt | null = await Receipt.findByIdAndDelete(id);
 
     if (!deleted) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Receipt not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Certificate deleted successfully",
+      message: "Receipt deleted successfully",
       data: deleted,
     });
   } catch (error) {
-    console.error("[DELETE certificate error]", error);
+    console.error("[DELETE receipt error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete certificate" },
+      { success: false, message: "Failed to delete receipt" },
       { status: 500 }
     );
   }

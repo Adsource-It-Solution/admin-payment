@@ -1,5 +1,8 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { Schema, model, models, type Document, type Model } from "mongoose";
 
+/* ----------------------------------------------
+   🧩 Certificate Interface
+---------------------------------------------- */
 export interface ICertificate extends Document {
   userId: string;
   name: string;
@@ -12,16 +15,30 @@ export interface ICertificate extends Document {
   createdAt: Date;
 }
 
-const CertificateSchema: Schema = new Schema({
-  userId: { type: String},
-  name: { type: String},
-  title: { type: String},
-  description: { type: String},
-  leaderName: { type: String},
-  advisorName: { type: String },
-  leaderTitle: { type: String},
-  advisorTitle: { type: String},
-  createdAt: { type: Date, default: Date.now },
-});
+/* ----------------------------------------------
+   🧩 Certificate Schema
+---------------------------------------------- */
+const certificateSchema = new Schema<ICertificate>(
+  {
+    userId: { type: String, required: true },
+    name: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    leaderName: { type: String, required: true },
+    advisorName: { type: String, required: true },
+    leaderTitle: { type: String, required: true },
+    advisorTitle: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  {
+    versionKey: false,
+  }
+);
 
-export default mongoose.models.Certificate || mongoose.model<ICertificate>("Certificate", CertificateSchema);
+/* ----------------------------------------------
+   🧠 Safe model export (avoids OverwriteModelError)
+---------------------------------------------- */
+const Certificate: Model<ICertificate> =
+  models.Certificate || model<ICertificate>("Certificate", certificateSchema);
+
+export default Certificate;

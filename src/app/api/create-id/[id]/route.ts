@@ -1,99 +1,114 @@
 import { NextResponse, type NextRequest } from "next/server";
 import connect from "@/app/lib/mongodb";
-import createid from "@/app/models/createid";
+import CreateId, { type ICreateId } from "@/app/models/createid";
 
+/* ----------------------------------------------
+   🧩 Response type helper
+---------------------------------------------- */
+interface ApiResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
+/* ----------------------------------------------
+   🧠 GET /api/createid/[id]
+---------------------------------------------- */
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> } // ✅ Next 15 signature
+): Promise<NextResponse<ApiResponse<ICreateId>>> {
+  const { id } = await params;
 
   try {
     await connect();
-    const certificate = await createid.findById(id);
+    const record = await CreateId.findById(id).lean<ICreateId | null>();
 
-    if (!certificate) {
+    if (!record) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Record not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: certificate });
+    return NextResponse.json({ success: true, data: record });
   } catch (error) {
-    console.error("[GET single certificate error]", error);
+    console.error("[GET single record error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch certificate" },
+      { success: false, message: "Failed to fetch record" },
       { status: 500 }
     );
   }
 }
 
-// 🧠 PUT update certificate
+/* ----------------------------------------------
+   🧠 PUT /api/createid/[id]
+---------------------------------------------- */
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse<ICreateId>>> {
+  const { id } = await params;
 
   try {
     await connect();
-    const body = await req.json();
+    const body = (await req.json()) as Partial<ICreateId>;
 
-    const updated = await createid.findByIdAndUpdate(id, body, {
+    const updated = await CreateId.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
-    });
+    }).lean<ICreateId | null>();
 
     if (!updated) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Record not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Certificate updated successfully",
+      message: "Record updated successfully",
       data: updated,
     });
   } catch (error) {
-    console.error("[PUT certificate error]", error);
+    console.error("[PUT record error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update certificate" },
+      { success: false, message: "Failed to update record" },
       { status: 500 }
     );
   }
 }
 
-// 🧠 DELETE certificate
+/* ----------------------------------------------
+   🧠 DELETE /api/createid/[id]
+---------------------------------------------- */
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse<ICreateId>>> {
+  const { id } = await params;
 
   try {
     await connect();
-    const deleted = await createid.findByIdAndDelete(id);
+    const deleted = await CreateId.findByIdAndDelete(id).lean<ICreateId | null>();
 
     if (!deleted) {
       return NextResponse.json(
-        { success: false, message: "Certificate not found" },
+        { success: false, message: "Record not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Certificate deleted successfully",
+      message: "Record deleted successfully",
       data: deleted,
     });
   } catch (error) {
-    console.error("[DELETE certificate error]", error);
+    console.error("[DELETE record error]", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete certificate" },
+      { success: false, message: "Failed to delete record" },
       { status: 500 }
     );
   }

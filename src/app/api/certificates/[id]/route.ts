@@ -1,16 +1,28 @@
 import { NextResponse, type NextRequest } from "next/server";
 import connect from "@/app/lib/mongodb";
-import Certificate from "@/app/models/certificate";
+import Certificate, { type ICertificate } from "@/app/models/certificate";
 
+/* ----------------------------------------------
+   🧩 Response type helper
+---------------------------------------------- */
+interface ApiResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+/* ----------------------------------------------
+   🧠 GET /api/certificates/[id]
+---------------------------------------------- */
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> }  // ✅ correct new typing for Next.js 15
+): Promise<NextResponse<ApiResponse<ICertificate>>> {
+  const { id } = await params; // ✅ must await since params is now async in 15+
 
   try {
     await connect();
-    const certificate = await Certificate.findById(id);
+    const certificate = await Certificate.findById(id).lean<ICertificate | null>();
 
     if (!certificate) {
       return NextResponse.json(
@@ -29,21 +41,23 @@ export async function GET(
   }
 }
 
-// 🧠 PUT update certificate
+/* ----------------------------------------------
+   🧠 PUT /api/certificates/[id]
+---------------------------------------------- */
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse<ICertificate>>> {
+  const { id } = await params;
 
   try {
     await connect();
-    const body = await req.json();
+    const body = (await req.json()) as Partial<ICertificate>;
 
     const updated = await Certificate.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
-    });
+    }).lean<ICertificate | null>();
 
     if (!updated) {
       return NextResponse.json(
@@ -66,16 +80,18 @@ export async function PUT(
   }
 }
 
-// 🧠 DELETE certificate
+/* ----------------------------------------------
+   🧠 DELETE /api/certificates/[id]
+---------------------------------------------- */
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse<ICertificate>>> {
+  const { id } = await params;
 
   try {
     await connect();
-    const deleted = await Certificate.findByIdAndDelete(id);
+    const deleted = await Certificate.findByIdAndDelete(id).lean<ICertificate | null>();
 
     if (!deleted) {
       return NextResponse.json(
