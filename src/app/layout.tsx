@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import ThemeRegistry from "./ThemeRegistry";
 
 export const metadata: Metadata = {
   title: "Payment Gateway",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {/* ✅ Wrap everything in ThemeRegistry for MUI SSR */}
+        <ThemeRegistry>{children}</ThemeRegistry>
+      </body>
     </html>
   );
 }

@@ -43,50 +43,6 @@ export default function CertificateEditor() {
   };
 
   /* ======================================================
-     🧾 Generate a True PDF (vector-based, not image)
-  ====================================================== */
-  const handleDownloadPDF = async () => {
-    setLoading(true);
-    try {
-      const pdf = new jsPDF("landscape", "mm", "a4");
-
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(24);
-      pdf.text(formData.title, 148, 40, { align: "center" });
-
-      pdf.setFontSize(16);
-      pdf.text("Presented to", 148, 60, { align: "center" });
-
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(28);
-      pdf.text(formData.name, 148, 80, { align: "center" });
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(14);
-      const descriptionLines = pdf.splitTextToSize(formData.description, 250);
-      pdf.text(descriptionLines, 148, 100, { align: "center" });
-
-      // Footer signatures
-      pdf.setFontSize(12);
-      pdf.text(formData.leaderName, 80, 180, { align: "center" });
-      pdf.text(formData.advisorName, 220, 180, { align: "center" });
-
-      pdf.setFont("helvetica", "italic");
-      pdf.setFontSize(10);
-      pdf.text(formData.leaderTitle, 80, 187, { align: "center" });
-      pdf.text(formData.advisorTitle, 220, 187, { align: "center" });
-
-      pdf.save(`${formData.name}-certificate.pdf`);
-      toast.success("✅ Certificate downloaded!");
-    } catch (err) {
-      console.error("handleDownloadPDF -> error:", err);
-      toast.error("❌ Failed to generate PDF");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ======================================================
      💾 Save Certificate
   ====================================================== */
   const handleSave = async () => {
@@ -287,7 +243,8 @@ export default function CertificateEditor() {
                 </button>
               )
             }
-          </PDFDownloadLink>;
+          </PDFDownloadLink>
+
           <button
             onClick={handleSave}
             disabled={loading}

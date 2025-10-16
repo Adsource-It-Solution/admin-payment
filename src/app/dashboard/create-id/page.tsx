@@ -183,36 +183,36 @@ const IDCardPage: React.FC = () => {
   };
   // handle save 
 
-  const handleSave = async () => {
-    const userId = auth.currentUser?.uid; // Get current authenticated user's ID
-    if (!userId) {
-      alert('❌ User is not authenticated');
-      return;
-    }
-
-    const payload = {
-      name: form.name,
-      role: form.role,
-      idNumber: form.idNumber,
-      phone: form.phone,
-      email: form.email,
-      imageUrl: form.imageUrl,
-      DOB: form.DOB,
-      address: form.address,
-    };
-
-    try {
-      const userRef = doc(db, 'users', userId); // Reference to the user's document
-      const idCardsRef = collection(userRef, 'idCards'); // Subcollection for ID cards
-
-      await setDoc(doc(idCardsRef, form.idNumber), payload); // Save the ID card data
-
-      alert('✅ ID saved successfully!');
-    } catch (err) {
-      console.error(err);
-      alert('❌ Failed to save ID');
-    }
+const handleSave = async () => {
+  const payload = {
+    name: form.name,
+    role: form.role,
+    idNumber: form.idNumber,
+    phone: form.phone,
+    email: form.email,
+    imageUrl: form.imageUrl,
+    DOB: form.DOB,
+    address: form.address,
   };
+
+  try {
+    const res = await fetch("/api/create-id/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to save");
+
+    alert("✅ ID saved successfully in MongoDB!");
+    console.log("🟢 Saved ID:", data.data);
+  } catch (err) {
+    console.error("❌ [handleSave Error]", err);
+    alert("❌ Failed to save ID");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex bg-gray-100 p-8 gap-6">
