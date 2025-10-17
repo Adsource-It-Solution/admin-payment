@@ -38,6 +38,7 @@ export default function CertificateEditor() {
   const [savedCertificates, setSavedCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const userId = "userId123";
+  console.log(savedCertificates)
 
   const handleChange = (field: keyof CertificateForm, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
