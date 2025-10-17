@@ -142,7 +142,7 @@ export const CertificatePDF = ({
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.border}>
         {/* Corners & Decorations */}
-        <Image src={corner} style={styles.cornerTL} />
+        <Image src={corner}  style={styles.cornerTL} />
         <Image src={corner} style={styles.cornerTR} />
         <Image src={bottomimage} style={styles.bottomImage} />
 

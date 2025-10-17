@@ -13,9 +13,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  CircularProgress,
 } from "@mui/material";
-import { Edit, Delete, Download, Add } from "@mui/icons-material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 import toast from "react-hot-toast"
 import { ClientOnly } from "@/app/components/ClientOnly";
 
@@ -41,6 +40,8 @@ export default function IDCardList() {
 
   console.log(setCurrentCard);
   console.log(openEdit);
+  console.log(loading);
+  
 
 
   const fetchCards = async () => {
@@ -119,26 +120,26 @@ export default function IDCardList() {
   /* ======================================================
      📥 Download Card (PDF)
   ====================================================== */
-  const downloadCard = async (id: string) => {
-    console.log("🟡 [downloadCard] Downloading ID:", id);
-    try {
-      const res = await fetch(`/api/create-id/${id}/download`);
-      if (!res.ok) throw new Error("Download failed");
+  // const downloadCard = async (id: string) => {
+  //   console.log("🟡 [downloadCard] Downloading ID:", id);
+  //   try {
+  //     const res = await fetch(`/api/create-id/${id}/download`);
+  //     if (!res.ok) throw new Error("Download failed");
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `id_card_${id}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+  //     const blob = await res.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = `id_card_${id}.pdf`;
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
 
-      toast.success("✅ ID Card downloaded successfully!");
-    } catch (error) {
-      console.error("❌ [downloadCard] Error:", error);
-      toast.error("⚠️ Failed to download ID Card");
-    }
-  };
+  //     toast.success("✅ ID Card downloaded successfully!");
+  //   } catch (error) {
+  //     console.error("❌ [downloadCard] Error:", error);
+  //     toast.error("⚠️ Failed to download ID Card");
+  //   }
+  // };
 
   /* ======================================================
      🚀 On Mount
