@@ -3,10 +3,7 @@ import mongoose from "mongoose";
 import connect from "@/app/lib/mongodb";
 import Receipt, { type IReceipt } from "@/app/models/receipt";
 
-/**
- * GET /api/receipt/[id]
- * Fetch a single receipt by ID
- */
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

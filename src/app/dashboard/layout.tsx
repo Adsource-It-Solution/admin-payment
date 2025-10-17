@@ -29,7 +29,7 @@ const routes = [
 ];
 
 const list = [
-  { path: "/dashboard/receipt-online", name: "Receipt Online", icon: <PiReceiptDuotone /> },
+  // { path: "/dashboard/receipt-online", name: "Receipt Online", icon: <PiReceiptDuotone /> },
   { path: "/dashboard/receipt-offline", name: "Receipt Offline", icon: <FaReceipt /> },
   { path: "/dashboard/idlist", name: "ID List", icon: <LiaListAltSolid /> },
   { path: "/dashboard/certificate-list", name: "Certificate List", icon: <IoMdListBox /> },
