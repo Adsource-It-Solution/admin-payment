@@ -1,5 +1,6 @@
 "use client";
 
+import { ClientOnly } from "@/app/components/ClientOnly";
 import { useEffect, useState } from "react";
 
 interface Certificate {
@@ -45,29 +46,31 @@ export default function CertificatesList() {
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Certificates</h1>
+    <ClientOnly>
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Certificates</h1>
 
-      {loading && <p>Loading...</p>}
+        {loading && <p>Loading...</p>}
 
-      <ul className="space-y-2">
-        {certificates.map((cert) => (
-          <li key={cert._id} className="border p-4 rounded flex justify-between items-center">
-            <div>
-              <strong>{cert.name}</strong> - {cert.title}
-              <p className="text-sm">{cert.description}</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded"
-                onClick={() => deleteCertificate(cert._id)}
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+        <ul className="space-y-2">
+          {certificates.map((cert) => (
+            <li key={cert._id} className="border p-4 rounded flex justify-between items-center">
+              <div>
+                <strong>{cert.name}</strong> - {cert.title}
+                <p className="text-sm">{cert.description}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="bg-red-500 text-white px-2 py-1 rounded"
+                  onClick={() => deleteCertificate(cert._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </ClientOnly>
   );
 }

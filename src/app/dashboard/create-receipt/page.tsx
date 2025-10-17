@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useRef, useState } from "react";
 import {
   TextField,
   Grid,
@@ -10,47 +11,49 @@ import {
   Typography,
   Divider,
   Box,
-} from '@mui/material';
-import { FaRupeeSign } from 'react-icons/fa';
-import { Email, Home, Description, CreditCard, Receipt } from '@mui/icons-material';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+} from "@mui/material";
+import { FaRupeeSign } from "react-icons/fa";
+import { Email, Home, Description, CreditCard, Receipt } from "@mui/icons-material";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { ClientOnly } from "@/app/components/ClientOnly";
+
+const DEFAULT_TRANSACTION_ID = "TXN-89J4K2P1";
+const DEFAULT_DATE = "2026-10-25";
 
 function CreateReceipt() {
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
-  const [address, setAddress] = useState('');
-  const [itemDescription, setItemDescription] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const [unitPrice, setUnitPrice] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('Credit Card');
-  const [transactionID, setTransactionID] = useState('TXN-89J4K2P1');
-  const [date, setDate] = useState('2026-10-25');
+  const [form, setForm] = useState({
+    name: "",
+    contact: "",
+    address: "",
+    itemDescription: "",
+    quantity: 1,
+    unitPrice: "",
+    totalAmount: "",
+    paymentMethod: "Credit Card",
+    transactionID: DEFAULT_TRANSACTION_ID,
+    date: DEFAULT_DATE,
+  });
 
   const receiptRef = useRef<HTMLDivElement>(null);
 
- useEffect(() => {
-    console.log("🧮 Recalculating total:", { quantity, unitPrice });
-    if (quantity && unitPrice) {
-      const total = quantity * parseFloat(unitPrice || "0");
-      console.log("✅ Computed Total:", total);
-      setTotalAmount(total.toFixed(2));
+  // ----------------- Recalculate Total -----------------
+  useEffect(() => {
+    if (form.quantity && form.unitPrice) {
+      const total = form.quantity * parseFloat(form.unitPrice || "0");
+      setForm((prev) => ({ ...prev, totalAmount: total.toFixed(2) }));
     }
-  }, [quantity, unitPrice]);
+  }, [form.quantity, form.unitPrice]);
 
-  /* ==============================
-     📅 Format Date
-  ===============================*/
+  // ----------------- Date Formatter -----------------
   const formatDate = (dateString: string) => {
-    console.log("🗓 Formatting date:", dateString);
     if (!dateString) return "";
     const dateObj = new Date(dateString);
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString("default", { month: "long" });
     const year = dateObj.getFullYear();
-
     let suffix = "th";
+
     if (day % 10 === 1 && day !== 11) suffix = "st";
     else if (day % 10 === 2 && day !== 12) suffix = "nd";
     else if (day % 10 === 3 && day !== 13) suffix = "rd";
@@ -58,80 +61,53 @@ function CreateReceipt() {
     return `${day}${suffix} ${month} ${year}`;
   };
 
-  /* ==============================
-     💾 Save to Backend
-  ===============================*/
+  // ----------------- Save to Backend -----------------
   const handleSaveToBackend = async () => {
     try {
-      const payload = {
-        name,
-        contact,
-        address,
-        itemDescription,
-        quantity,
-        unitPrice,
-        totalAmount,
-        paymentMethod,
-        transactionID,
-        date,
-      };
-
-      console.log("📤 Sending payload to backend:", payload);
-
       const response = await fetch("/api/create-receipt", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
-      console.log("📥 Raw response:", response);
-
       if (!response.ok) throw new Error("Failed to save receipt");
-
-      const result = await response.json();
-      console.log("✅ Backend response data:", result);
-
-      alert("✅ Receipt data saved successfully!");
-    } catch (error) {
-      console.error("❌ Error saving receipt:", error);
+      await response.json();
+      alert("✅ Receipt saved successfully!");
+    } catch (err) {
+      console.error(err);
       alert("❌ Failed to save receipt");
     }
   };
 
-  /* ==============================
-     📄 Download PDF
-  ===============================*/
+  // ----------------- Download PDF -----------------
   const handleDownloadPDF = async () => {
-    console.log("📄 Starting PDF download...");
-
-    if (!receiptRef.current) {
-      console.error("❌ Receipt reference not found!");
-      return;
-    }
+    if (!receiptRef.current) return;
 
     try {
       const canvas = await html2canvas(receiptRef.current, { scale: 2 });
-      console.log("🖼 Canvas captured:", canvas);
-
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 190;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save(`Receipt_${transactionID}.pdf`);
-      console.log("✅ PDF downloaded successfully!");
+      pdf.save(`Receipt_${form.transactionID}.pdf`);
     } catch (err) {
-      console.error("❌ PDF generation failed:", err);
+      console.error("PDF generation failed:", err);
     }
   };
 
+  // ----------------- Handle Input Changes -----------------
+  const handleChange = (field: keyof typeof form, value: string | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <Box display="flex" justifyContent="space-around" gap={4} p={4} flexWrap="wrap">
-      {/* ===== Left: Receipt View ===== */}
-      <Card ref={receiptRef} sx={{ maxWidth: 600, bgcolor: '#faf1e6', border: '1px solid #e57373' }}>
+    <ClientOnly>
+
+    <Box display="flex" flexWrap="wrap" gap={4} p={4} justifyContent="center">
+      {/* ===== Receipt Preview ===== */}
+      <Card ref={receiptRef} sx={{ maxWidth: 600, bgcolor: "#faf1e6", border: "1px solid #e57373" }}>
         <Box bgcolor="error.main" color="white" px={4} py={2} display="flex" justifyContent="space-between">
           <Typography variant="h6" fontWeight="bold">
             Payment Receipt Invoice
@@ -143,6 +119,7 @@ function CreateReceipt() {
         </Box>
 
         <CardContent>
+          {/* Customer Info */}
           <Typography variant="h6" gutterBottom>
             Customer Info
           </Typography>
@@ -151,19 +128,20 @@ function CreateReceipt() {
             <tbody>
               <tr>
                 <td className="py-2 font-semibold pr-4">Name:</td>
-                <td>{name || 'Richard Sanchez'}</td>
+                <td>{form.name || "Richard Sanchez"}</td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold pr-4">Contact:</td>
-                <td>{contact || 'hello@reallygreatsite.com'}</td>
+                <td>{form.contact || "hello@reallygreatsite.com"}</td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold pr-4">Address:</td>
-                <td>{address || '123 Anywhere St., Any City, ST 12345'}</td>
+                <td>{form.address || "123 Anywhere St., Any City, ST 12345"}</td>
               </tr>
             </tbody>
           </table>
 
+          {/* Item Description */}
           <Box mt={3}>
             <Typography variant="h6" gutterBottom>
               Description
@@ -180,44 +158,39 @@ function CreateReceipt() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="py-2 px-2 border">
-                    {itemDescription || 'Annual Subscription for Premium Digital Marketing Tools'}
-                  </td>
-                  <td className="py-2 px-2 border text-center">{quantity}</td>
-                  <td className="py-2 px-2 border text-center">
-                    ₹ {unitPrice || '499.00'}
-                  </td>
-                  <td className="py-2 px-2 border text-center">
-                    ₹ {totalAmount || '499.00'}
-                  </td>
+                  <td className="py-2 px-2 border">{form.itemDescription || "Annual Subscription for Premium Tools"}</td>
+                  <td className="py-2 px-2 border text-center">{form.quantity}</td>
+                  <td className="py-2 px-2 border text-center">₹ {form.unitPrice || "499.00"}</td>
+                  <td className="py-2 px-2 border text-center">₹ {form.totalAmount || "499.00"}</td>
                 </tr>
               </tbody>
             </table>
           </Box>
 
-          <Box mt={3} display="flex" justifyContent="space-between" alignItems="flex-start">
+          {/* Payment Details */}
+          <Box mt={3} display="flex" justifyContent="space-between">
             <Box>
               <Typography variant="h6">Payment Details</Typography>
               <Typography>
-                <strong>Method:</strong> {paymentMethod}
+                <strong>Method:</strong> {form.paymentMethod}
               </Typography>
               <Typography>
-                <strong>Transaction ID:</strong> {transactionID}
+                <strong>Transaction ID:</strong> {form.transactionID}
               </Typography>
             </Box>
-            <Box>
+            <Box textAlign="right">
               <Typography variant="h6" color="error">
                 Total Paid
               </Typography>
               <Typography variant="h5" fontWeight="bold" color="error">
-                ₹ {totalAmount || '499.00'}
+                ₹ {form.totalAmount || "499.00"}
               </Typography>
             </Box>
           </Box>
 
           <Box mt={3}>
             <Typography variant="body2">
-              Subscription valid until <strong>{formatDate(date)}</strong>.
+              Subscription valid until <strong>{formatDate(form.date)}</strong>.
             </Typography>
             <Typography variant="body2">
               For support: <strong>hello@reallygreatsite.com</strong> | +123-456-7890
@@ -226,140 +199,66 @@ function CreateReceipt() {
         </CardContent>
       </Card>
 
-      {/* ===== Right: Form ===== */}
+      {/* ===== Input Form ===== */}
       <Card sx={{ maxWidth: 400, p: 3 }}>
-        <Typography variant="h5" gutterBottom
-          sx={{
-            borderRadius: 2
-          }}
-          bgcolor="error.main" color="white" px={4} py={2} display="flex" justifyContent="space-between">
+        <Typography
+          variant="h5"
+          gutterBottom
+          bgcolor="error.main"
+          color="white"
+          px={4}
+          py={2}
+          borderRadius={2}
+        >
           Enter Receipt Information
         </Typography>
+
         <Box display="flex" flexDirection="column" gap={2}>
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e: any) => setName(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Receipt />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
-
-          <TextField
-            label="Contact"
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Email />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
-
-          <TextField
-            label="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Home />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
-
-          <TextField
-            label="Item Description"
-            value={itemDescription}
-            onChange={(e) => setItemDescription(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Description />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
+          {[
+            { label: "Name", icon: <Receipt />, value: form.name, field: "name" },
+            { label: "Contact", icon: <Email />, value: form.contact, field: "contact" },
+            { label: "Address", icon: <Home />, value: form.address, field: "address" },
+            { label: "Item Description", icon: <Description />, value: form.itemDescription, field: "itemDescription" },
+            { label: "Payment Method", icon: <CreditCard />, value: form.paymentMethod, field: "paymentMethod" },
+            { label: "Transaction ID", icon: <Receipt />, value: form.transactionID, field: "transactionID" },
+          ].map((input) => (
+            <TextField
+              key={input.field}
+              label={input.label}
+              value={input.value}
+              onChange={(e) => handleChange(input.field as keyof typeof form, e.target.value)}
+              InputProps={{ startAdornment: <InputAdornment position="start">{input.icon}</InputAdornment> }}
+              variant="outlined"
+              fullWidth
+            />
+          ))}
 
           <Grid container spacing={2}>
             <TextField
               label="Quantity"
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              value={form.quantity}
+              onChange={(e) => handleChange("quantity", Number(e.target.value))}
               variant="outlined"
               fullWidth
             />
             <TextField
               label="Unit Price"
               type="number"
-              value={unitPrice}
-              onChange={(e) => setUnitPrice(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaRupeeSign />
-                  </InputAdornment>
-                ),
-              }}
+              value={form.unitPrice}
+              onChange={(e) => handleChange("unitPrice", e.target.value)}
+              InputProps={{ startAdornment: <InputAdornment position="start"><FaRupeeSign /></InputAdornment> }}
               variant="outlined"
               fullWidth
             />
           </Grid>
 
           <TextField
-            label="Payment Method"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <CreditCard />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
-
-          <TextField
-            label="Transaction ID"
-            value={transactionID}
-            onChange={(e) => setTransactionID(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Receipt />
-                </InputAdornment>
-              ),
-            }}
-            variant="outlined"
-            fullWidth
-          />
-
-          <TextField
             label="Subscription Date"
             type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            value={form.date}
+            onChange={(e) => handleChange("date", e.target.value)}
+            InputLabelProps={{ shrink: true }}
             variant="outlined"
             fullWidth
           />
@@ -369,12 +268,13 @@ function CreateReceipt() {
               Download PDF
             </Button>
             <Button variant="contained" color="primary" onClick={handleSaveToBackend}>
-              Save Pdf
+              Save PDF
             </Button>
           </Box>
         </Box>
       </Card>
     </Box>
+        </ClientOnly>
   );
 }
 

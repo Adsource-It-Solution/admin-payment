@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { Edit, Delete, Download, Add } from "@mui/icons-material";
 import toast from "react-hot-toast"
+import { ClientOnly } from "@/app/components/ClientOnly";
 
 interface IDCard {
   _id: string;
@@ -42,27 +43,27 @@ export default function IDCardList() {
   console.log(openEdit);
 
 
-const fetchCards = async () => {
-  console.log("🟡 [fetchCards] Starting fetch...");
-  setLoading(true);
-  try {
-    const res = await fetch("/api/create-id");
-    const data = await res.json();
-    console.log("📦 [fetchCards] Data received:", data);
+  const fetchCards = async () => {
+    console.log("🟡 [fetchCards] Starting fetch...");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create-id");
+      const data = await res.json();
+      console.log("📦 [fetchCards] Data received:", data);
 
-    if (data.success && Array.isArray(data.data)) {
-      setIdCards(data.data); // ✅ use data.data
-      console.log("✅ [fetchCards] ID cards set successfully:", data.data);
-    } else {
-      console.warn("⚠️ [fetchCards] Unexpected response:", data);
-      setIdCards([]); // Prevent crash
+      if (data.success && Array.isArray(data.data)) {
+        setIdCards(data.data); // ✅ use data.data
+        console.log("✅ [fetchCards] ID cards set successfully:", data.data);
+      } else {
+        console.warn("⚠️ [fetchCards] Unexpected response:", data);
+        setIdCards([]); // Prevent crash
+      }
+    } catch (err) {
+      console.error("❌ [fetchCards] Error fetching cards:", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("❌ [fetchCards] Error fetching cards:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   /* ======================================================
      💾 Save / Update Card (PUT)
@@ -147,89 +148,92 @@ const fetchCards = async () => {
   }, []);
 
   return (
-    <div className="p-8">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" fontWeight="bold" color="primary">
-          ID Cards
-        </Typography>
-        <Button
-          startIcon={<Add />}
-          variant="contained"
-          onClick={() => {
-            setForm({});
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          Add ID
-        </Button>
-      </Stack>
+    <ClientOnly>
 
-      {Array.isArray(idCards) && idCards.length > 0 ? (
-        idCards.map((card) => (
-          <Card key={card._id} sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" color="primary">
-                {card.name}
-              </Typography>
-              <Typography variant="body2">{card.role}</Typography>
-              <Typography variant="body2">{card.email}</Typography>
+      <div className="p-8">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
+          <Typography variant="h4" fontWeight="bold" color="primary">
+            ID Cards
+          </Typography>
+          <Button
+            startIcon={<Add />}
+            variant="contained"
+            onClick={() => {
+              setForm({});
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            Add ID
+          </Button>
+        </Stack>
 
-              <Stack direction="row" spacing={1} justifyContent="flex-end" mt={2}>
-                <IconButton
-                  color="primary"
-                  onClick={() => {
-                    setEditing(card);
-                    setForm(card);
-                    setOpen(true);
-                  }}
-                >
-                  <Edit />
-                </IconButton>
-                <IconButton color="error" onClick={() => deleteCard(card._id)}>
-                  <Delete />
-                </IconButton>
-                {/* Uncomment when ready to download */}
-                {/* <IconButton color="success" onClick={() => downloadCard(card)}>
+        {Array.isArray(idCards) && idCards.length > 0 ? (
+          idCards.map((card) => (
+            <Card key={card._id} sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Typography variant="h6" color="primary">
+                  {card.name}
+                </Typography>
+                <Typography variant="body2">{card.role}</Typography>
+                <Typography variant="body2">{card.email}</Typography>
+
+                <Stack direction="row" spacing={1} justifyContent="flex-end" mt={2}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => {
+                      setEditing(card);
+                      setForm(card);
+                      setOpen(true);
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => deleteCard(card._id)}>
+                    <Delete />
+                  </IconButton>
+                  {/* Uncomment when ready to download */}
+                  {/* <IconButton color="success" onClick={() => downloadCard(card)}>
             <Download />
           </IconButton> */}
-              </Stack>
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <Typography
-          variant="body1"
-          align="center"
-          color="textSecondary"
-          sx={{ gridColumn: "1 / -1", mt: 4 }}
-        >
-          No ID cards found.
-        </Typography>
-      )}
+                </Stack>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography
+            variant="body1"
+            align="center"
+            color="textSecondary"
+            sx={{ gridColumn: "1 / -1", mt: 4 }}
+          >
+            No ID cards found.
+          </Typography>
+        )}
 
 
-      {/* 🧩 Dialog for Create / Edit */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>{editing ? "Edit ID Card" : "Add New ID Card"}</DialogTitle>
-        <DialogContent className="space-y-3 mt-2">
-          {["name", "phone", "email", "DOB", "address", "role", "idNumber"].map((field) => (
-            <TextField
-              key={field}
-              label={field.toUpperCase()}
-              fullWidth
-              value={(form as any)[field] || ""}
-              onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-            />
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveCard}>
-            {editing ? "Update" : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+        {/* 🧩 Dialog for Create / Edit */}
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
+          <DialogTitle>{editing ? "Edit ID Card" : "Add New ID Card"}</DialogTitle>
+          <DialogContent className="space-y-3 mt-2">
+            {["name", "phone", "email", "DOB", "address", "role", "idNumber"].map((field) => (
+              <TextField
+                key={field}
+                label={field.toUpperCase()}
+                fullWidth
+                value={(form as any)[field] || ""}
+                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+              />
+            ))}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={saveCard}>
+              {editing ? "Update" : "Save"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </ClientOnly>
   );
 }
