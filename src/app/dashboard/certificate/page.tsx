@@ -8,9 +8,13 @@ import corner from "@/app/assets/corner.png";
 import bottomimage from "@/app/assets/bottomimage.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CertificatePDF } from "@/app/components/certificatepdf";
-import { log } from "console";
+import dynamic from "next/dynamic";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 interface CertificateForm {
   name: string;
