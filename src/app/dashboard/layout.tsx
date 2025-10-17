@@ -11,7 +11,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import {
   PiCertificateDuotone,
   PiIdentificationCardDuotone,
-  PiReceiptDuotone,
   PiListStarFill,
 } from "react-icons/pi";
 import { LiaReceiptSolid, LiaListAltSolid } from "react-icons/lia";
