@@ -15,11 +15,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null; // prevents hydration mismatch
+  if (!mounted) return null; 
 
-  // Allowed admin credentials from environment variables
   const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL!;
-  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD!;
+  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_REQUIRE!;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
