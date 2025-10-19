@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Page,
   Text,
@@ -8,15 +8,17 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-// 🧩 Fonts (optional, use built-in if you like)
+// 🧩 Register font (optional)
 Font.register({
   family: "Poppins",
   fonts: [
-    { src: "https://fonts.gstatic.com/s/poppins/v15/pxiEyp8kv8JHgFVrJJfecg.woff2" },
+    {
+      src: "https://fonts.gstatic.com/s/poppins/v15/pxiEyp8kv8JHgFVrJJfecg.woff2",
+    },
   ],
 });
 
-// 🎨 Styles (same tone as your MUI card)
+// 🎨 Styles
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#faf1e6",
@@ -50,6 +52,14 @@ const styles = StyleSheet.create({
     color: "#b71c1c",
     marginBottom: 6,
   },
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+  infoLabel: {
+    width: 80,
+    fontWeight: "bold",
+  },
   table: {
     display: "flex",
     width: "auto",
@@ -81,14 +91,6 @@ const styles = StyleSheet.create({
     borderColor: "#e57373",
     padding: 4,
   },
-  infoRow: {
-    flexDirection: "row",
-    marginBottom: 4,
-  },
-  infoLabel: {
-    width: 80,
-    fontWeight: "bold",
-  },
   paymentBox: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -108,25 +110,38 @@ const styles = StyleSheet.create({
   },
 });
 
-// 🧾 React PDF Component
+// 🧾 Receipt PDF Component
 export default function ReceiptPDFDocument({
-  name = "Richard Sanchez",
-  contact = "hello@reallygreatsite.com",
-  address = "123 Anywhere St., Any City, ST 12345",
-  itemDescription = "Annual Subscription for Premium Digital Marketing Tools",
-  quantity = 1,
-  unitPrice = "499.00",
-  totalAmount = "499.00",
-  paymentMethod = "Credit Card",
-  transactionID = "TXN123456",
-  date = new Date().toISOString(),
+  name = "",
+  contact = "",
+  address = "",
+  itemDescription = "",
+  quantity = "",
+  unitPrice = "",
+  totalAmount = "",
+  paymentMethod = "",
+  transactionID = "",
+  date = "",
+}: {
+  name?: string;
+  contact?: string;
+  address?: string;
+  itemDescription?: string;
+  quantity?: string | number; 
+  unitPrice?: string;
+  totalAmount?: string;
+  paymentMethod?: string;
+  transactionID?: string;
+  date?: string;
 }) {
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    d
+      ? new Date(d).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+      : "";
 
   return (
     <Document>
@@ -135,8 +150,8 @@ export default function ReceiptPDFDocument({
         <View style={styles.header}>
           <Text style={styles.title}>Payment Receipt Invoice</Text>
           <View style={styles.contactRight}>
-            <Text>+123-456-7890</Text>
-            <Text>www.reallygreatsite.com</Text>
+            <Text></Text>
+            <Text></Text>
           </View>
         </View>
 
@@ -145,15 +160,15 @@ export default function ReceiptPDFDocument({
           <Text style={styles.sectionTitle}>Customer Info</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Name:</Text>
-            <Text>{name}</Text>
+            <Text>{String(name ?? "")}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Contact:</Text>
-            <Text>{contact}</Text>
+            <Text>{String(contact ?? "")}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Address:</Text>
-            <Text>{address}</Text>
+            <Text>{String(address ?? "")}</Text>
           </View>
         </View>
 
@@ -169,13 +184,23 @@ export default function ReceiptPDFDocument({
             </View>
 
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCol, { width: "40%" }]}>{itemDescription}</Text>
-              <Text style={[styles.tableCol, { width: "15%", textAlign: "center" }]}>{quantity}</Text>
-              <Text style={[styles.tableCol, { width: "20%", textAlign: "center" }]}>
-                ₹ {unitPrice}
+              <Text style={[styles.tableCol, { width: "40%" }]}>
+                {String(itemDescription ?? "")}
               </Text>
-              <Text style={[styles.tableCol, { width: "25%", textAlign: "center" }]}>
-                ₹ {totalAmount}
+              <Text
+                style={[styles.tableCol, { width: "15%", textAlign: "center" }]}
+              >
+                {String(quantity ?? "")}
+              </Text>
+              <Text
+                style={[styles.tableCol, { width: "20%", textAlign: "center" }]}
+              >
+                ₹ {String(unitPrice ?? "")}
+              </Text>
+              <Text
+                style={[styles.tableCol, { width: "25%", textAlign: "center" }]}
+              >
+                ₹ {String(totalAmount ?? "")}
               </Text>
             </View>
           </View>
@@ -186,17 +211,21 @@ export default function ReceiptPDFDocument({
           <View>
             <Text style={styles.sectionTitle}>Payment Details</Text>
             <Text>
-              <Text style={{ fontWeight: "bold" }}>Method:</Text> {paymentMethod}
+              <Text style={{ fontWeight: "bold" }}>Method:</Text>{" "}
+              {String(paymentMethod ?? "")}
             </Text>
             <Text>
-              <Text style={{ fontWeight: "bold" }}>Transaction ID:</Text> {transactionID}
+              <Text style={{ fontWeight: "bold" }}>Transaction ID:</Text>{" "}
+              {String(transactionID ?? "")}
             </Text>
           </View>
 
           <View style={styles.totalBox}>
             <Text style={styles.totalText}>Total Paid</Text>
-            <Text style={{ fontSize: 16, fontWeight: "bold", color: "#e53935" }}>
-              ₹ {totalAmount}
+            <Text
+              style={{ fontSize: 16, fontWeight: "bold", color: "#e53935" }}
+            >
+              ₹ {String(totalAmount ?? "")}
             </Text>
           </View>
         </View>
@@ -204,10 +233,11 @@ export default function ReceiptPDFDocument({
         {/* 📅 Footer */}
         <View style={styles.section}>
           <Text style={styles.smallText}>
-            Subscription valid until <Text style={{ fontWeight: "bold" }}>{formatDate(date)}</Text>.
+            Subscription valid until{" "}
+            <Text style={{ fontWeight: "bold" }}>{formatDate(date)}</Text>.
           </Text>
           <Text style={styles.smallText}>
-            For support: <Text style={{ fontWeight: "bold" }}>hello@reallygreatsite.com</Text> | +123-456-7890
+            For support: <Text style={{ fontWeight: "bold" }}></Text> |
           </Text>
         </View>
       </Page>
