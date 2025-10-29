@@ -42,11 +42,17 @@ function CreateReceipt() {
     unitPrice: "",
     totalAmount: "",
     paymentMethod: "Credit Card",
+    pan: "",
     transactionID: DEFAULT_TRANSACTION_ID,
     date: DEFAULT_DATE,
   });
-
+  const [receiptNo, setReceiptNo] = useState("");
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const uniqueNumber = `HET_${Math.floor(100000 + Math.random() * 900000)}`;
+    setReceiptNo(uniqueNumber);
+  }, []);
 
   useEffect(() => {
     if (form.quantity && form.unitPrice) {
@@ -105,132 +111,147 @@ function CreateReceipt() {
           <Card
             ref={receiptRef}
             sx={{
-              bgcolor: "#faf1e6",
-              border: "1px solid #e57373",
               width: "100%",
+              maxWidth: 800,
+              mx: "auto",
+              mt: 4,
+              border: "2px solid #009688",
+              borderRadius: 2,
+              bgcolor: "white",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             }}
           >
-            <Box
-              bgcolor="error.main"
-              color="white"
-              px={3}
-              py={2}
-              display="flex"
-              flexDirection={{ xs: "column", sm: "row" }}
-              justifyContent="space-between"
-              alignItems={{ xs: "flex-start", sm: "center" }}
-              gap={1}
-            >
-              <Typography variant="h6" fontWeight="bold">
-                Payment Receipt Invoice
-              </Typography>
-              <Box textAlign={{ xs: "left", sm: "right" }}>
-                <Typography variant="body2">+123-456-7890</Typography>
-                <Typography variant="body2">
-                  www.reallygreatsite.com
+            {/* Header Section */}
+            <div className="flex flex-row px-10 py-4 bg-cyan-200 border-b-2 rounded-b-md">
+              <div>
+              <img src="/logo-pdf.png" alt="Health and Eductation Trust" className="w-72 h-16" />
+                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                  REGD NO: 568/2025
                 </Typography>
-              </Box>
+                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                  NGO DARPAN ID- UP/2025/0820407
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                  PAN NO: AADTH3780K
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                  ALL DONATIONS ARE EXEMPTED U/S 80G OF 
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                INCOME TAX ACT, 1961
+                </Typography>
+
+              </div>
+              
+            </div>
+
+            {/* Title */}
+            <Box textAlign="center" py={2}>
+              <Typography variant="h6" fontWeight="bold" color="teal">
+                Donation Receipt
+              </Typography>
             </Box>
 
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Customer Info
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <table className="w-full border-collapse text-sm sm:text-base">
-                <tbody>
-                  <tr>
-                    <td className="py-2 font-semibold pr-4">Name:</td>
-                    <td>{form.name || "Richard Sanchez"}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2 font-semibold pr-4">Contact:</td>
-                    <td>{form.contact || "hello@reallygreatsite.com"}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2 font-semibold pr-4">Address:</td>
-                    <td>
-                      {form.address || "123 Anywhere St., Any City, ST 12345"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <Box mt={3}>
-                <Typography variant="h6" gutterBottom>
-                  Description
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <table className="w-full border-collapse text-sm sm:text-base">
-                  <thead>
-                    <tr className="bg-red-100 text-left">
-                      <th className="py-2 px-2 border">Description</th>
-                      <th className="py-2 px-2 border text-center">Qty</th>
-                      <th className="py-2 px-2 border text-center">
-                        Unit Price
-                      </th>
-                      <th className="py-2 px-2 border text-center">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="py-2 px-2 border">
-                        {form.itemDescription ||
-                          "Annual Subscription for Premium Tools"}
-                      </td>
-                      <td className="py-2 px-2 border text-center">
-                        {form.quantity}
-                      </td>
-                      <td className="py-2 px-2 border text-center">
-                        ₹ {form.unitPrice || "499.00"}
-                      </td>
-                      <td className="py-2 px-2 border text-center">
-                        ₹ {form.totalAmount || "499.00"}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </Box>
-
-              <Box
-                mt={3}
-                display="flex"
-                flexDirection={{ xs: "column", sm: "row" }}
-                justifyContent="space-between"
-                gap={2}
-              >
+            <CardContent sx={{ px: 4, pb: 4 }}>
+              {/* Receipt No & Date */}
+              <Box display="flex" justifyContent="space-between" mb={2}>
                 <Box>
-                  <Typography variant="h6">Payment Details</Typography>
-                  <Typography>
-                    <strong>Method:</strong> {form.paymentMethod}
-                  </Typography>
-                  <Typography>
-                    <strong>Transaction ID:</strong> {form.transactionID}
+                  <Typography variant="body2" fontWeight="bold">
+                    Receipt No:   {receiptNo}
                   </Typography>
                 </Box>
-                <Box textAlign={{ xs: "left", sm: "right" }}>
-                  <Typography variant="h6" color="error">
-                    Total Paid
+                <Box textAlign="right">
+                  <Typography variant="body2" fontWeight="bold">
+                    Date:   {form.date}
                   </Typography>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    color="error"
-                    sx={{ wordBreak: "break-word" }}
-                  >
-                    ₹ {form.totalAmount || "499.00"}
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Donor Info Rows */}
+              <Box display="flex" justifyContent="space-between" mb={1}>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold">
+                    Donor Name:  {form.name}
+                  </Typography>
+                </Box>
+                <Box textAlign="right">
+                  <Typography variant="body2" fontWeight="bold">
+                    Mobile No:   {form.contact}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between" mb={1}>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold">
+                    Amount (in words):   ₹ {form.totalAmount} /-
+                  </Typography>
+                </Box>
+                <Box textAlign="right">
+                  <Typography variant="body2" fontWeight="bold">
+                    Payment Mode:   Offline
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between" mb={1}>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold">
+                    Donation Date:   {form.date}
+                  </Typography>
+                </Box>
+                <Box textAlign="right">
+                  <Typography variant="body2" fontWeight="bold">
+                    PAN No:   {form.pan}
                   </Typography>
                 </Box>
               </Box>
 
               <Box mt={3}>
                 <Typography variant="body2">
-                  Subscription valid until{" "}
-                  <strong>{formatDate(form.date)}</strong>.
+                Thank you so much for contributing to <span className="font-bold">Heath and Education Trust</span>.
                 </Typography>
-                <Typography variant="body2">
-                  For support:{" "}
-                  <strong>hello@reallygreatsite.com</strong> | +123-456-7890
+              </Box>
+              <Box mt={2}>
+                <Typography variant="body2" color="text.secondary">
+                  NOTE: Your donation
+                  benefits food, clothing, education, and healthcare for underprivileged children.
+                  Donations are exempted under Section 80G of the Income Tax Act, 1961.
+                </Typography>
+                <Typography variant="body2" color="text.secondary">Please keep this receipt as acknowledgment of your contribution.</Typography>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Footer Section */}
+
+              <div className="flex justify-center flex-col items-center">
+                <span className="font-bold text-2xl text-purple-700">
+                  HEALTH AND EDUCATION TRUST
+                </span>
+                <div className="border-2 border-y-cyan-600 border-x-cyan-700 px-5 py-5 rounded-2xl">
+                  <img src="/sign.png" alt="" className="w-44 h-24" />
+                </div>
+              </div>
+
+
+
+              <Divider sx={{ my: 3 }} />
+              <p className="font-bold text-2xl text-teal-700 text-center">Contact Us</p>
+              <Box textAlign="left">
+                <Typography variant="body2" color="text.secondary">
+                  📞 9551799919
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  📧 info@healthandeducationtrust.org
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  📍C Block, 3rd Floor Sect-2, Noida, Uttar Pradesh-201301
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  🌐 www.healthandeducationtrust.org
                 </Typography>
               </Box>
             </CardContent>
@@ -284,21 +305,11 @@ function CreateReceipt() {
 
               <Grid container spacing={2}>
                 <TextField
-                  label="Quantity"
-                  type="number"
-                  value={form.quantity}
-                  onChange={(e) =>
-                    handleChange("quantity", Number(e.target.value))
-                  }
-                  variant="outlined"
-                  fullWidth
-                />
-                <TextField
                   label="Unit Price"
                   type="number"
-                  value={form.unitPrice}
+                  value={form.totalAmount}
                   onChange={(e) =>
-                    handleChange("unitPrice", e.target.value)
+                    handleChange("totalAmount", e.target.value)
                   }
                   InputProps={{
                     startAdornment: (
@@ -354,6 +365,7 @@ function CreateReceipt() {
 
         </Grid>
       </Box>
+
     </ClientOnly>
   );
 }
