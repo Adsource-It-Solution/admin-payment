@@ -19,35 +19,63 @@ import {
   Description,
   CreditCard,
   Receipt,
+  LocalPhone
 } from "@mui/icons-material";
 import dynamic from "next/dynamic";
 import { ClientOnly } from "@/app/components/ClientOnly";
 import ReceiptPDFDocument from "@/app/components/ReceiptPDFDocument";
+import { ReceiptDocument } from "@/app/pdf/receipt";
+import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
   { ssr: false }
 );
 
-const DEFAULT_TRANSACTION_ID = "TXN-89J4K2P1";
-const DEFAULT_DATE = "2026-10-25";
 
-function CreateReceipt() {
+
+export type transaction = {
+  receiptNo: string;
+  name: string;
+  contact: string;
+  mobile: string;
+  address: string;
+  itemDescription: string;
+  unitPrice: string;
+  totalAmount: string;
+  paymentMethod: string;
+  pan: string;
+  transactionID: string;
+  date: string;
+}
+
+const today = new Date();
+const DEFAULT_DATE = `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
+
+
+function transaction() {
   const [form, setForm] = useState({
+    receiptNo: "",
     name: "",
     contact: "",
+    mobile: "",
     address: "",
     itemDescription: "",
     quantity: 1,
     unitPrice: "",
     totalAmount: "",
-    paymentMethod: "Credit Card",
+    paymentMethod: "",
     pan: "",
-    transactionID: DEFAULT_TRANSACTION_ID,
+    transactionID: "",
     date: DEFAULT_DATE,
   });
   const [receiptNo, setReceiptNo] = useState("");
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loadingPdf, setLoadingPdf] = useState<boolean>(false);
+  const [transaction, setTransaction] = useState<transaction | null>(null);
+
 
   useEffect(() => {
     const uniqueNumber = `HET_${Math.floor(100000 + Math.random() * 900000)}`;
@@ -64,6 +92,21 @@ function CreateReceipt() {
   const handleChange = (field: keyof typeof form, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setLoadingPdf(true);
+  
+      // ✅ Use form data instead of transaction
+      const blob = await pdf(<ReceiptDocument transaction={form} />).toBlob();
+      saveAs(blob, `Receipt_${form.transactionID || "draft"}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      setLoadingPdf(false);
+    }
+  };
+  
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -124,25 +167,25 @@ function CreateReceipt() {
             {/* Header Section */}
             <div className="flex flex-row px-10 py-4 bg-[#ECF4E8] border-b-2 rounded-b-md">
               <div>
-              <img src="/logo-pdf.png" alt="Health and Eductation Trust" className="w-72 h-16" />
-                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                <img src="/logo-pdf.png" alt="Health and Eductation Trust" className="w-72 h-16" />
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
                   REGD NO: 568/2025
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
                   NGO DARPAN ID- UP/2025/0820407
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
                   PAN NO: AADTH3780K
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
-                  ALL DONATIONS ARE EXEMPTED U/S 80G OF 
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
+                  ALL DONATIONS ARE EXEMPTED U/S 80G OF
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>
-                INCOME TAX ACT, 1961
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "bold" }}>
+                  INCOME TAX ACT, 1961
                 </Typography>
 
               </div>
-              
+
             </div>
 
             {/* Title */}
@@ -178,20 +221,35 @@ function CreateReceipt() {
                 </Box>
                 <Box textAlign="right">
                   <Typography variant="body2" fontWeight="bold">
-                    Mobile No:   {form.contact}
+                    Email:   {form.contact}
                   </Typography>
                 </Box>
               </Box>
-
               <Box display="flex" justifyContent="space-between" mb={1}>
                 <Box>
+                  <Typography variant="body2" fontWeight="bold">
+                    Donation for:   {form.itemDescription}
+                  </Typography>
                   <Typography variant="body2" fontWeight="bold">
                     Amount (in words):   ₹ {form.totalAmount} /-
                   </Typography>
                 </Box>
+                <Box  textAlign="right">
+                  <Typography variant="body2" fontWeight="bold">
+                    Mobile No:   {form.mobile}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between" mb={1}>
+                <Box>
+                <Typography variant="body2" fontWeight="bold">
+                    Payment Mode:   {form.paymentMethod}
+                  </Typography>
+                </Box>
                 <Box textAlign="right">
                   <Typography variant="body2" fontWeight="bold">
-                    Payment Mode:   Offline
+                    Address:   {form.address}
                   </Typography>
                 </Box>
               </Box>
@@ -199,7 +257,7 @@ function CreateReceipt() {
               <Box display="flex" justifyContent="space-between" mb={1}>
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    Donation Date:   {form.date}
+                    Transaction Id:   {form.transactionID}
                   </Typography>
                 </Box>
                 <Box textAlign="right">
@@ -211,7 +269,7 @@ function CreateReceipt() {
 
               <Box mt={3}>
                 <Typography variant="body2">
-                Thank you so much for contributing to <span className="font-bold">Heath and Education Trust</span>.
+                  Thank you so much for contributing to <span className="font-bold">Heath and Education Trust</span>.
                 </Typography>
               </Box>
               <Box mt={2}>
@@ -235,7 +293,6 @@ function CreateReceipt() {
                   <img src="/sign.png" alt="" className="w-44 h-24" />
                 </div>
               </div>
-              +91 88514 59880
 
 
               <Divider sx={{ my: 3 }} />
@@ -248,7 +305,7 @@ function CreateReceipt() {
                   📧 info@healthandeducationtrust.org
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  📍C Block, 3rd Floor Sect-2, Noida, Uttar Pradesh-201301
+                  📍C-59, C Block, 3rd Floor Sect-2, Noida-201301
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   🌐 www.healthandeducationtrust.org
@@ -275,10 +332,12 @@ function CreateReceipt() {
             <Box display="flex" flexDirection="column" gap={2} mt={2}>
               {[
                 { label: "Name", icon: <Receipt />, value: form.name, field: "name" },
-                { label: "Contact", icon: <Email />, value: form.contact, field: "contact" },
+                { label: "Pan Card", icon:  <CreditCard />, value: form.pan, field: "pan" },
+                { label: "Email", icon: <Email />, value: form.contact, field: "contact" },
+                { label: "Phone No.", icon: <LocalPhone />, value: form.mobile, field: "mobile" },
                 { label: "Address", icon: <Home />, value: form.address, field: "address" },
-                { label: "Item Description", icon: <Description />, value: form.itemDescription, field: "itemDescription" },
-                { label: "Payment Method", icon: <CreditCard />, value: form.paymentMethod, field: "paymentMethod" },
+                { label: "Donation For", icon: <Description />, value: form.itemDescription, field: "itemDescription" },
+                { label: "Payment Via", icon: <CreditCard />, value: form.paymentMethod, field: "paymentMethod" },
                 { label: "Transaction ID", icon: <Receipt />, value: form.transactionID, field: "transactionID" },
               ].map((input) => (
                 <TextField
@@ -305,7 +364,7 @@ function CreateReceipt() {
 
               <Grid container spacing={2}>
                 <TextField
-                  label="Unit Price"
+                  label="Amount"
                   type="number"
                   value={form.totalAmount}
                   onChange={(e) =>
@@ -324,7 +383,7 @@ function CreateReceipt() {
               </Grid>
 
               <TextField
-                label="Subscription Date"
+                label="Date"
                 type="date"
                 value={form.date}
                 onChange={(e) => handleChange("date", e.target.value)}
@@ -334,7 +393,7 @@ function CreateReceipt() {
               />
 
               <Grid container spacing={2}>
-                <PDFDownloadLink
+                {/* <PDFDownloadLink
                   document={<ReceiptPDFDocument {...form} />}
                   fileName={`Receipt_${form.transactionID}.pdf`}
                   style={{ textDecoration: "none", width: "100%" }}
@@ -349,7 +408,15 @@ function CreateReceipt() {
                       {loading ? "⏳ Generating..." : "Download PDF"}
                     </Button>
                   )}
-                </PDFDownloadLink>
+                </PDFDownloadLink> */}
+                <Button
+                 variant="contained"
+                  color="secondary"
+                  fullWidth
+                  sx={{ py: 1.5 }}
+                  onClick={handleDownloadPdf}>
+                {loadingPdf ? "⏳ Generating..." : "Download PDF"}
+                </Button>
                 <Button
                   variant="contained"
                   color="primary"
@@ -370,4 +437,4 @@ function CreateReceipt() {
   );
 }
 
-export default CreateReceipt;
+export default transaction;
