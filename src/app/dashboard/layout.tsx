@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
           </List>
 
-          <ListItem
+          {/* <ListItem
             sx={{
               fontSize: "1.5rem",
               fontWeight: "bold",
@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <PiListStarFill />
             </ListItemIcon>
             List
-          </ListItem>
+          </ListItem> */}
 
           {/* <List>
             {list.map((item, index) => (
