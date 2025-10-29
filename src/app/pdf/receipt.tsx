@@ -270,9 +270,9 @@ export const ReceiptDocument: React.FC<ReceiptDocumentPdfProps> = ({ transaction
           <View style={styles.footer}>
             <Text style={{ textAlign: "center", fontSize: 16, color: "#00695c", fontWeight: "bold", marginBottom: 5, marginTop: 5 }}>
               Contact Us</Text>
-              <Text style={{ textAlign: "center" }}> +91 88514 59880 </Text>
-              <Text style={{ textAlign: "center" }}> www.healthandeducationtrust.org</Text>
-              <Text style={{ textAlign: "center" }}>info@healthandeducationtrust.org</Text>
+              <Text style={{ textAlign: "center" }}>Phone No. : +91 88514 59880 </Text>
+              <Text style={{ textAlign: "center" }}>Website:  www.healthandeducationtrust.org</Text>
+              <Text style={{ textAlign: "center" }}>Email: info@healthandeducationtrust.org</Text>
             <Text style={{ textAlign: "center" }}>
               Address: C Block, 3rd Floor Sect-2,
             </Text>

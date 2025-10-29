@@ -72,15 +72,14 @@ function transaction() {
   });
   const [receiptNo, setReceiptNo] = useState("");
   const receiptRef = useRef<HTMLDivElement>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [loadingPdf, setLoadingPdf] = useState<boolean>(false);
-  const [transaction, setTransaction] = useState<transaction | null>(null);
 
 
   useEffect(() => {
     const uniqueNumber = `HET_${Math.floor(100000 + Math.random() * 900000)}`;
-    setReceiptNo(uniqueNumber);
+    setForm((prev) => ({ ...prev, receiptNo: uniqueNumber }));
   }, []);
+  
 
   useEffect(() => {
     if (form.quantity && form.unitPrice) {
@@ -96,7 +95,7 @@ function transaction() {
   const handleDownloadPdf = async () => {
     try {
       setLoadingPdf(true);
-  
+
       // ✅ Use form data instead of transaction
       const blob = await pdf(<ReceiptDocument transaction={form} />).toBlob();
       saveAs(blob, `Receipt_${form.transactionID || "draft"}.pdf`);
@@ -106,7 +105,7 @@ function transaction() {
       setLoadingPdf(false);
     }
   };
-  
+
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -200,7 +199,7 @@ function transaction() {
               <Box display="flex" justifyContent="space-between" mb={2}>
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    Receipt No:   {receiptNo}
+                    Receipt No:   {form.receiptNo}
                   </Typography>
                 </Box>
                 <Box textAlign="right">
@@ -234,7 +233,7 @@ function transaction() {
                     Amount (in words):   ₹ {form.totalAmount} /-
                   </Typography>
                 </Box>
-                <Box  textAlign="right">
+                <Box textAlign="right">
                   <Typography variant="body2" fontWeight="bold">
                     Mobile No:   {form.mobile}
                   </Typography>
@@ -243,7 +242,7 @@ function transaction() {
 
               <Box display="flex" justifyContent="space-between" mb={1}>
                 <Box>
-                <Typography variant="body2" fontWeight="bold">
+                  <Typography variant="body2" fontWeight="bold">
                     Payment Mode:   {form.paymentMethod}
                   </Typography>
                 </Box>
@@ -329,10 +328,23 @@ function transaction() {
               Enter Receipt Information
             </Typography>
 
+            <Grid container spacing={2}>
+              <TextField
+                label="Receipt No."
+                type="text"
+                value={form.receiptNo}
+                onChange={(e) => handleChange("receiptNo", e.target.value)}
+                variant="outlined"
+                fullWidth
+                disabled // 👈 keep disabled if you don’t want manual edits
+              />
+            </Grid>
+
+
             <Box display="flex" flexDirection="column" gap={2} mt={2}>
               {[
                 { label: "Name", icon: <Receipt />, value: form.name, field: "name" },
-                { label: "Pan Card", icon:  <CreditCard />, value: form.pan, field: "pan" },
+                { label: "Pan Card", icon: <CreditCard />, value: form.pan, field: "pan" },
                 { label: "Email", icon: <Email />, value: form.contact, field: "contact" },
                 { label: "Phone No.", icon: <LocalPhone />, value: form.mobile, field: "mobile" },
                 { label: "Address", icon: <Home />, value: form.address, field: "address" },
@@ -410,14 +422,14 @@ function transaction() {
                   )}
                 </PDFDownloadLink> */}
                 <Button
-                 variant="contained"
+                  variant="contained"
                   color="secondary"
                   fullWidth
                   sx={{ py: 1.5 }}
                   onClick={handleDownloadPdf}>
-                {loadingPdf ? "⏳ Generating..." : "Download PDF"}
+                  {loadingPdf ? "⏳ Generating..." : "Download PDF"}
                 </Button>
-                <Button
+                {/* <Button
                   variant="contained"
                   color="primary"
                   fullWidth
@@ -425,7 +437,7 @@ function transaction() {
                   onClick={handleSaveToBackend}
                 >
                   Save PDF
-                </Button>
+                </Button> */}
               </Grid>
             </Box>
           </Card>
