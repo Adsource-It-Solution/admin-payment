@@ -27,12 +27,12 @@ const routes = [
   { path: "/dashboard/certificate", name: "Create Certificate", icon: <PiCertificateDuotone /> },
 ];
 
-const list = [
-  // { path: "/dashboard/receipt-online", name: "Receipt Online", icon: <PiReceiptDuotone /> },
-  { path: "/dashboard/receipt-offline", name: "Receipt Offline", icon: <FaReceipt /> },
-  { path: "/dashboard/idlist", name: "ID List", icon: <LiaListAltSolid /> },
-  { path: "/dashboard/certificate-list", name: "Certificate List", icon: <IoMdListBox /> },
-];
+// const list = [
+//   // { path: "/dashboard/receipt-online", name: "Receipt Online", icon: <PiReceiptDuotone /> },
+//   { path: "/dashboard/receipt-offline", name: "Receipt Offline", icon: <FaReceipt /> },
+//   { path: "/dashboard/idlist", name: "ID List", icon: <LiaListAltSolid /> },
+//   { path: "/dashboard/certificate-list", name: "Certificate List", icon: <IoMdListBox /> },
+// ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             List
           </ListItem>
 
-          <List>
+          {/* <List>
             {list.map((item, index) => (
               <Fragment key={item.path}>
                 <ListItem component={Link} href={item.path} className="flex items-center gap-2 py-2 px-4">
@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}
               </Fragment>
             ))}
-          </List>
+          </List> */}
         </Box>
       </Drawer>
 
