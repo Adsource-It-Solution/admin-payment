@@ -122,7 +122,7 @@ function CreateReceipt() {
             }}
           >
             {/* Header Section */}
-            <div className="flex flex-row px-10 py-4 bg-cyan-200 border-b-2 rounded-b-md">
+            <div className="flex flex-row px-10 py-4 bg-[#ECF4E8] border-b-2 rounded-b-md">
               <div>
               <img src="/logo-pdf.png" alt="Health and Eductation Trust" className="w-72 h-16" />
                 <Typography variant="body2" color="text.secondary" sx={{fontWeight: "bold"}}>

@@ -24,25 +24,18 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
-    // Check credentials first (before calling Firebase)
+  
     if (email.trim() !== ADMIN_EMAIL || password.trim() !== ADMIN_PASSWORD) {
       setError("Access denied: Unauthorized credentials");
       setLoading(false);
       return;
     }
-
-    try {
-      // Firebase login (admin user must exist in Firebase)
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard/create-receipt"); // redirect to admin dashboard
-    } catch (err: any) {
-      console.error(err);
-      setError("Login failed: Invalid credentials or Firebase error");
-    } finally {
-      setLoading(false);
-    }
+  
+    // No Firebase needed
+    router.push("/dashboard/create-receipt");
+    setLoading(false);
   };
+  
 
   return (
     <ClientOnly>
