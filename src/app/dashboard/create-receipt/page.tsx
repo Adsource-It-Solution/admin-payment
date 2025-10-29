@@ -235,14 +235,14 @@ function CreateReceipt() {
                   <img src="/sign.png" alt="" className="w-44 h-24" />
                 </div>
               </div>
-
+              +91 88514 59880
 
 
               <Divider sx={{ my: 3 }} />
               <p className="font-bold text-2xl text-teal-700 text-center">Contact Us</p>
               <Box textAlign="left">
                 <Typography variant="body2" color="text.secondary">
-                  📞 9551799919
+                  📞 +91 88514 59880
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   📧 info@healthandeducationtrust.org
