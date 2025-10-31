@@ -6,9 +6,11 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Topbar from "@/app/assets/Untitled.png";
+import logo from "@/app/assets/logo-pdf.png"
 import JsBarcode from "jsbarcode";
 import { IDCardPDF } from "@/app/components/idpdf";
 import { ClientOnly } from "@/app/components/ClientOnly";
+import dummyimage from "@/app/assets/user.png"
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -62,36 +64,40 @@ const IDCard = React.forwardRef<HTMLDivElement, Person>((props, ref) => {
         priority
       />
 
+
       <div className="flex p-8 pt-20">
-        <div className="flex-1 space-y-4 text-[#0E1F47]">
-          {[
-            { label: "NAME", value: name || "Full Name" },
-            { label: "Phone", value: phone || "XXXXXXXXXX" },
-            { label: "E-Mail", value: email || "youremail@gmail.com" },
-            { label: "D.O.B", value: formatDate(DOB) },
-            { label: "ADDRESS", value: address || "123 Anywhere St." },
-          ].map((item) => (
-            <div key={item.label} className="flex items-start">
-              <span className="w-24 font-semibold">{item.label}</span>
-              <span className="mx-2">:</span>
-              <span className="font-medium">{item.value}</span>
+        <div className="flex flex-col">
+          <div>
+            <Image
+              src={logo}
+              alt="" />
+          </div>
+          <div className="flex-1 space-y-4 text-[#0E1F47]">
+            {[
+              { label: "NAME", value: name },
+              { label: "Phone", value: phone },
+              { label: "E-Mail", value: email },
+              { label: "D.O.B", value: formatDate(DOB) },
+              { label: "ADDRESS", value: address },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start">
+                <span className="w-24 font-semibold">{item.label}</span>
+                <span className="mx-2">:</span>
+                <span className="font-medium">{item.value}</span>
+              </div>
+            ))}
+            <div className="flex items-center">
+              <span className="font-bold text-xl">{role}</span>
             </div>
-          ))}
-          <div className="flex items-start">
-            <span className="font-bold text-xl">{role || "Manager"}</span>
           </div>
         </div>
-
         <div className="flex flex-col items-end relative w-1/2">
           <div className="bg-[#5A8DBE] rounded-2xl w-[150px] h-[200px] mr-5 overflow-hidden border-2 border-gray-300">
-            <img
-              src={
-                imageUrl ||
-                "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80"
-              }
-              alt="profile"
-              className="object-cover h-full w-full"
-            />
+            <img src={imageUrl}
+             alt="Profile image"
+             className="object-cover w-[150px] h-[200px]"
+             />
+
           </div>
           <div className="mt-6 relative left-10">
             <svg ref={barcodeRef} className="h-5" />
@@ -123,7 +129,7 @@ const IDCardPage: React.FC = () => {
     address: "",
   });
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [, setImagePreview] = useState<string | null>(null);
 
   // ----------------- Generate ID Number -----------------
   const generateIDNumber = (data: Person) => {

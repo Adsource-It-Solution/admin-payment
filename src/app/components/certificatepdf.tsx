@@ -9,6 +9,8 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
+import logo from "@/app/assets/logo-pdf.png";
+import defaultSign from "@/app/assets/signature.jpg";
 
 interface CertificatePDFProps {
   name: string;
@@ -21,9 +23,10 @@ interface CertificatePDFProps {
   medal: string;
   corner: string;
   bottomimage: string;
+  headSign?: string;
+  advisorSign?: string;
 }
 
-// 🎨 Styles mimic your Tailwind/HTML structure
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#ffffff",
@@ -42,12 +45,26 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     padding: 30,
   },
+  logo: {
+    width: 400,
+    height: 80,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
   title: {
     fontSize: 28,
     color: "#0E1F47",
     textTransform: "uppercase",
     fontWeight: "bold",
-    marginTop: 90,
+    marginTop: 10,
+  },
+  medalContainer: {
+    marginTop: 10,
+  },
+  medal: {
+    width: 60,
+    height: 60,
+    alignSelf: "center",
   },
   presented: {
     fontSize: 16,
@@ -68,16 +85,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     lineHeight: 1.5,
   },
-  medalContainer: {
-    position: "absolute",
-    top: 25,
-    left: "50%",
-    transform: "translateX(-50%)",
-  },
-  medal: {
-    width: 60,
-    height: 60,
-  },
   cornerTL: {
     position: "absolute",
     top: 0,
@@ -97,7 +104,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: "100%"
+    width: "100%",
   },
   footer: {
     flexDirection: "row",
@@ -108,13 +115,14 @@ const styles = StyleSheet.create({
   },
   signatureBlock: {
     textAlign: "center",
+    width: "40%",
   },
-  signatureLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#555",
-    width: 120,
+  signatureImage: {
+    width: 100,
+    height: 50,
+    objectFit: "contain",
+    alignSelf: "center",
     marginBottom: 4,
-    marginHorizontal: "auto",
   },
   signatureName: {
     fontSize: 10,
@@ -137,35 +145,49 @@ export const CertificatePDF = ({
   medal,
   corner,
   bottomimage,
+  headSign,
+  advisorSign,
 }: CertificatePDFProps) => (
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.border}>
         {/* Corners & Decorations */}
-        <Image src={corner}  style={styles.cornerTL} />
+        <Image src={corner} style={styles.cornerTL} />
         <Image src={corner} style={styles.cornerTR} />
         <Image src={bottomimage} style={styles.bottomImage} />
+
+        {/* Header */}
+        <Image src={logo.src} style={styles.logo} />
+        <Text style={styles.title}>{title}</Text>
 
         {/* Medal */}
         <View style={styles.medalContainer}>
           <Image src={medal} style={styles.medal} />
         </View>
 
-        {/* Text */}
-        <Text style={styles.title}>{title}</Text>
+        {/* Recipient */}
         <Text style={styles.presented}>Presented to</Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.description}>{description}</Text>
 
         {/* Signatures */}
         <View style={styles.footer}>
+          {/* Leader */}
           <View style={styles.signatureBlock}>
-            <View style={styles.signatureLine} />
+            <Image
+              src={headSign || defaultSign.src}
+              style={styles.signatureImage}
+            />
             <Text style={styles.signatureName}>{leaderName}</Text>
             <Text style={styles.signatureTitle}>{leaderTitle}</Text>
           </View>
+
+          {/* Advisor */}
           <View style={styles.signatureBlock}>
-            <View style={styles.signatureLine} />
+            <Image
+              src={advisorSign || defaultSign.src}
+              style={styles.signatureImage}
+            />
             <Text style={styles.signatureName}>{advisorName}</Text>
             <Text style={styles.signatureTitle}>{advisorTitle}</Text>
           </View>

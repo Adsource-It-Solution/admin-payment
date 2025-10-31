@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import {
   Page,
@@ -8,136 +8,183 @@ import {
   StyleSheet,
   Document,
 } from "@react-pdf/renderer";
+import topbar from "@/app/assets/Untitled.png";
+import logo from "@/app/assets/logo-pdf.png";
 
-// 🎨 PDF Styles (equivalent to your Tailwind design)
+// ✨ PDF Styles (compact + proportionate for single-page card)
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#ffffff",
-    padding: 20,
+    padding: 0,
     alignItems: "center",
+    justifyContent: "center",
   },
   card: {
-    width: 350,
+    width: 320,
+    height: 200,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#d1d5db",
     overflow: "hidden",
+    backgroundColor: "#ffffff",
+    position: "relative",
   },
-  topBar: {
-    height: 25,
-    backgroundColor: "#F4B740",
-  },
-  blueBar: {
-    height: 25,
-    backgroundColor: "#0E1F47",
+  topImage: {
+    width: "100%",
+    height: 60,
+    transform: "scaleX(-1)",
+    position: "absolute",
+    top: 0,
+    left: 0,
   },
   content: {
-    padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingTop: 65,
+    paddingBottom: 5,
   },
-  left: {
+  leftSection: {
     width: "60%",
+    flexDirection: "column",
+    justifyContent: "flex-start",
   },
-  right: {
-    width: "40%",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: "#0E1F47",
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: 600,
-    color: "#0E1F47",
-    marginBottom: 2,
-  },
-  value: {
-    fontSize: 10,
-    color: "#111827",
+  logo: {
+    width: 160,
+    height: 35,
     marginBottom: 6,
   },
-  photoBox: {
-    width: 100,
-    height: 130,
-    borderRadius: 10,
-    overflow: "hidden",
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 3,
+  },
+  label: {
+    width: 50,
+    fontSize: 7.5,
+    fontWeight: 700,
+    color: "#0E1F47",
+  },
+  colon: {
+    fontSize: 7.5,
+    marginHorizontal: 2,
+    color: "#0E1F47",
+  },
+  value: {
+    fontSize: 7.5,
+    color: "#111827",
+    flexShrink: 1,
+  },
+  roleText: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#0E1F47",
+    marginTop: 3,
+  },
+  rightSection: {
+    width: "35%",
+    alignItems: "center",
+  },
+  imageBox: {
+    width: 70,
+    height: 90,
+    borderRadius: 6,
     backgroundColor: "#5A8DBE",
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    overflow: "hidden",
   },
   image: {
     width: "100%",
     height: "100%",
     objectFit: "cover",
   },
-  role: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: "#0E1F47",
-    marginTop: 5,
+  idContainer: {
+    alignItems: "center",
+    paddingVertical: 4,
   },
-  bottomId: {
-    textAlign: "center",
-    fontSize: 12,
+  idText: {
+    fontSize: 9,
     fontWeight: 600,
     color: "#0E1F47",
-    marginVertical: 8,
+  },
+  bottomBarYellow: {
+    height: 5,
+    backgroundColor: "#F4B740",
+  },
+  bottomBarBlue: {
+    height: 5,
+    backgroundColor: "#0E1F47",
   },
 });
 
-// 📄 The main PDF component
+// 🪪 ID Card Component (single-page compact)
 export const IDCardPDF = ({
   name = "Full Name",
   phone = "9999999999",
   email = "youremail@gmail.com",
-  DOB = "01/01/2000",
+  DOB = "2000-01-01",
   address = "123 Anywhere St., Any City",
   role = "Manager",
   idNumber = "IDXXXX000XXX",
   imageUrl = "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80",
-}) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.card}>
-        <View style={styles.topBar} />
-        <View style={styles.content}>
-          {/* Left Section */}
-          <View style={styles.left}>
-            <Text style={styles.title}>Employee ID</Text>
-            <View>
-              <Text style={styles.label}>NAME</Text>
-              <Text style={styles.value}>{name}</Text>
+}) => {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
-              <Text style={styles.label}>PHONE NO.</Text>
-              <Text style={styles.value}>{phone}</Text>
+  return (
+    <Document>
+      <Page size={{ width: 350, height: 220 }} style={styles.page}>
+        <View style={styles.card}>
+          {/* 🌄 Topbar */}
+          <Image src={topbar.src} style={styles.topImage} />
 
-              <Text style={styles.label}>E-MAIL</Text>
-              <Text style={styles.value}>{email}</Text>
-
-              <Text style={styles.label}>D.O.B</Text>
-              <Text style={styles.value}>{DOB}</Text>
-
-              <Text style={styles.label}>ADDRESS</Text>
-              <Text style={styles.value}>{address}</Text>
+          {/* 🔹 Main Content */}
+          <View style={styles.content}>
+            {/* Left Section */}
+            <View style={styles.leftSection}>
+              <Image src={logo.src} style={styles.logo} />
+              {[
+                { label: "NAME", value: name },
+                { label: "PHONE", value: phone },
+                { label: "EMAIL", value: email },
+                { label: "D.O.B", value: formatDate(DOB) },
+                { label: "ADDRESS", value: address },
+              ].map((item) => (
+                <View key={item.label} style={styles.labelRow}>
+                  <Text style={styles.label}>{item.label}</Text>
+                  <Text style={styles.colon}>:</Text>
+                  <Text style={styles.value}>{item.value}</Text>
+                </View>
+              ))}
+              <Text style={styles.roleText}>{role}</Text>
             </View>
 
-            <Text style={styles.role}>{role}</Text>
-          </View>
-
-          {/* Right Section */}
-          <View style={styles.right}>
-            <View style={styles.photoBox}>
-              <Image src={imageUrl} style={styles.image} />
+            {/* Right Section */}
+            <View style={styles.rightSection}>
+              <View style={styles.imageBox}>
+                <Image src={imageUrl} style={styles.image} />
+              </View>
             </View>
           </View>
+
+          {/* ID Number */}
+          <View style={styles.idContainer}>
+            <Text style={styles.idText}>{idNumber}</Text>
+          </View>
+
+          {/* Bottom Bars */}
+          <View style={styles.bottomBarYellow} />
+          <View style={styles.bottomBarBlue} />
         </View>
-
-        <Text style={styles.bottomId}>{idNumber}</Text>
-        <View style={styles.blueBar} />
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+};
