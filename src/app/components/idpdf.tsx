@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import topbar from "@/app/assets/Untitled.png";
 import logo from "@/app/assets/logo-pdf.png";
+import sign from "@/app/assets/signature.jpg"; // ✅ default signature fallback
 
 // ✨ PDF Styles (compact + proportionate for single-page card)
 const styles = StyleSheet.create({
@@ -100,6 +101,8 @@ const styles = StyleSheet.create({
     objectFit: "cover",
   },
   idContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 4,
   },
@@ -107,6 +110,8 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 600,
     color: "#0E1F47",
+    marginLeft: 10,
+    marginTop: 10,
   },
   bottomBarYellow: {
     height: 5,
@@ -116,9 +121,20 @@ const styles = StyleSheet.create({
     height: 5,
     backgroundColor: "#0E1F47",
   },
+  signatureBox: {
+    width: 50,
+    height: 25,
+    position: "absolute",
+    bottom: 2,
+    right: 40,
+  },
+  signature: {
+    width: 70,
+    height: 30,
+  },
 });
 
-// 🪪 ID Card Component (single-page compact)
+// 🪪 ID Card PDF Component
 export const IDCardPDF = ({
   name = "Full Name",
   phone = "9999999999",
@@ -128,7 +144,11 @@ export const IDCardPDF = ({
   role = "Manager",
   idNumber = "IDXXXX000XXX",
   imageUrl = "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80",
+  signUrl = "",
 }) => {
+  // ✅ Use default signature if user hasn't uploaded one
+  const signatureSrc = signUrl && signUrl.trim() !== "" ? signUrl : sign.src;
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -175,9 +195,13 @@ export const IDCardPDF = ({
             </View>
           </View>
 
-          {/* ID Number */}
+          {/* ID Number + Signature */}
           <View style={styles.idContainer}>
             <Text style={styles.idText}>{idNumber}</Text>
+            <View style={styles.signatureBox}>
+              {/* ✅ Default signature support */}
+              <Image src={signatureSrc} style={styles.signature} />
+            </View>
           </View>
 
           {/* Bottom Bars */}

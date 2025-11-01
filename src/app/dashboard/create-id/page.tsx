@@ -10,6 +10,7 @@ import logo from "@/app/assets/logo-pdf.png"
 import JsBarcode from "jsbarcode";
 import { IDCardPDF } from "@/app/components/idpdf";
 import { ClientOnly } from "@/app/components/ClientOnly";
+import sign from "@/app/assets/signature.jpg"
 import dummyimage from "@/app/assets/user.png"
 
 const PDFDownloadLink = dynamic(
@@ -26,11 +27,12 @@ export interface Person {
   email?: string;
   DOB: string;
   address?: string;
+  signUrl?: string;
 }
 
 // ----------------------------- ID Card Component -----------------------------
 const IDCard = React.forwardRef<HTMLDivElement, Person>((props, ref) => {
-  const { name, role, idNumber, imageUrl, phone, email, DOB, address } = props;
+  const { name, role, idNumber, imageUrl, phone, email, DOB, address, signUrl } = props;
   const barcodeRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
@@ -93,20 +95,23 @@ const IDCard = React.forwardRef<HTMLDivElement, Person>((props, ref) => {
         </div>
         <div className="flex flex-col items-end relative w-1/2">
           <div className="bg-[#5A8DBE] rounded-2xl w-[150px] h-[200px] mr-5 overflow-hidden border-2 border-gray-300">
-            <img src={imageUrl}
-             alt="Profile image"
-             className="object-cover w-[150px] h-[200px]"
-             />
+            <img src={imageUrl || dummyimage.src}
+              alt="Profile image"
+              className="object-cover w-[150px] h-[200px]"
+            />
 
-          </div>
-          <div className="mt-6 relative left-10">
-            <svg ref={barcodeRef} className="h-5" />
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center pb-3">
-        <span className="font-medium text-xl">{idNumber || "IDXXXX000XXX"}</span>
+      <div className="flex justify-between mx-2 pb-3">
+        <span className="font-medium text-xl ml-5 mt-6">{idNumber || "IDXXXX"}</span>
+        <img
+          src={signUrl && signUrl.trim() !== "" ? signUrl : sign.src}
+          alt="Signature"
+          className="w-[100px] h-[50px] right-20 relative object-contain"
+        />
+
       </div>
 
       <div className="bg-[#F4B740] h-3 w-full" />
@@ -127,6 +132,7 @@ const IDCardPage: React.FC = () => {
     imageUrl: "",
     DOB: "",
     address: "",
+    signUrl: "",
   });
 
   const [, setImagePreview] = useState<string | null>(null);
@@ -159,20 +165,31 @@ const IDCardPage: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // ----------------- Save to Backend -----------------
-  const handleSave = async () => {
-    try {
-      const res = await fetch("/api/create-id", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (data.success) alert("✅ ID Saved Successfully!");
-    } catch (err) {
-      alert("❌ Failed to save ID");
-    }
+  const handleSignUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setForm((prev) => ({ ...prev, signUrl: base64 }));
+    };
+    reader.readAsDataURL(file);
   };
+
+  // // ----------------- Save to Backend -----------------
+  // const handleSave = async () => {
+  //   try {
+  //     const res = await fetch("/api/create-id", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(form),
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) alert("✅ ID Saved Successfully!");
+  //   } catch (err) {
+  //     alert("❌ Failed to save ID");
+  //   }
+  // };
 
   return (
     <ClientOnly>
@@ -181,9 +198,9 @@ const IDCardPage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-3xl font-bold text-[#0E1F47]">🪪 ID Card Creator</h1>
           <div className="flex gap-3">
-            <Button onClick={handleSave} variant="contained" color="primary">
+            {/* <Button onClick={handleSave} variant="contained" color="primary">
               Save
-            </Button>
+            </Button> */}
             <PDFDownloadLink
               document={<IDCardPDF {...form} />}
               fileName={`ID_${form.idNumber || "Sample"}.pdf`}
@@ -218,28 +235,57 @@ const IDCardPage: React.FC = () => {
           ))}
 
           {/* Image Upload */}
-          <div className="col-span-1 md:col-span-3">
-            <input
-              accept="image/*"
-              id="upload-image"
-              type="file"
-              style={{ display: "none" }}
-              onChange={handleImageUpload}
-            />
-            <label htmlFor="upload-image" className="w-full">
-              <Button
-                variant="contained"
-                component="span"
-                color="error"
-                fullWidth
-                startIcon={<CloudUploadIcon />}
-                sx={{ textTransform: "none", borderRadius: 2, py: 1.5, fontWeight: 600 }}
-              >
-                Upload Image
-              </Button>
-              <span className="text-red-600 text-sm">Image should not be greater than 1MB</span>
-            </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* --- Upload Main Image --- */}
+            <div>
+              <input
+                accept="image/*"
+                id="upload-image"
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleImageUpload}
+              />
+              <label htmlFor="upload-image" className="w-full block">
+                <Button
+                  variant="contained"
+                  component="span"
+                  color="error"
+                  fullWidth
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ textTransform: "none", borderRadius: 2, py: 1.5, fontWeight: 600 }}
+                >
+                  Upload Image
+                </Button>
+                <span className="text-red-600 text-sm block mt-1">
+                  Image should not be greater than 1MB
+                </span>
+              </label>
+            </div>
+
+            {/* --- Upload Signature --- */}
+            <div>
+              <input
+                accept="image/*"
+                id="upload-sign"
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleSignUpload}
+              />
+              <label htmlFor="upload-sign" className="w-full block">
+                <Button
+                  variant="contained"
+                  component="span"
+                  color="primary"
+                  fullWidth
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ textTransform: "none", borderRadius: 2, py: 1.5, fontWeight: 600 }}
+                >
+                  Upload Signature
+                </Button>
+              </label>
+            </div>
           </div>
+
         </div>
 
         {/* Live Preview */}

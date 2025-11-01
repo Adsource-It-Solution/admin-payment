@@ -15,7 +15,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* ✅ Wrap everything in ThemeRegistry for MUI SSR */}
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>

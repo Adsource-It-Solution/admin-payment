@@ -65,26 +65,26 @@ export default function CertificateEditor() {
     }
   };
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/certificates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, ...formData }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success("✅ Certificate saved successfully!");
-        fetchCertificates();
-      } else toast.error("❌ Failed to save certificate");
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Server error while saving");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSave = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await fetch("/api/certificates", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ userId, ...formData }),
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       toast.success("✅ Certificate saved successfully!");
+  //       fetchCertificates();
+  //     } else toast.error("❌ Failed to save certificate");
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("❌ Server error while saving");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchCertificates = async () => {
     try {
@@ -307,19 +307,19 @@ export default function CertificateEditor() {
               fileName={`${formData.name}-certificate.pdf`}
             >
               {({ loading }) => (
-                <button className="flex-1 bg-[#0E1F47] text-white py-2 rounded-md font-semibold hover:bg-[#132b6b] transition">
+                <button className="flex-1 bg-[#0E1F47] text-white py-2 px-5 rounded-md font-semibold hover:bg-[#132b6b] transition">
                   {loading ? "⏳ Generating..." : "🖨 Download PDF"}
                 </button>
               )}
             </PDFDownloadWrapper>
-
+{/* 
             <button
               onClick={handleSave}
               disabled={loading}
               className="flex-1 bg-gray-200 py-2 rounded-md font-semibold hover:bg-gray-300 transition"
             >
               💾 Save
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
